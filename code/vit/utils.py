@@ -1,9 +1,11 @@
 from typing import Tuple
 
 import numpy as np
+import tqdm
 
 import torch
 import torch.nn as nn
+from torchvision.transforms import v2
 
 
 def train_one_epoch(model : nn.Module,
@@ -12,11 +14,18 @@ def train_one_epoch(model : nn.Module,
                     dl_train : torch.utils.data.DataLoader,
                     device : str = 'cuda:0') -> float:
     model = model.train()
+        
+    cutmix = v2.CutMix(num_classes=10)
+    mixup = v2.MixUp(num_classes=10)
+    cutmix_or_mixup = v2.RandomChoice([cutmix, mixup], p=[0.5, 0.5])
     
     epoch_losses = []
     for imgs, labels in dl_train:
         imgs = imgs.to(device)
         labels = labels.to(device)
+        
+        if np.random.rand() > 0.15:
+            imgs, labels = cutmix_or_mixup(imgs, labels)
         
         optimizer.zero_grad()
         logits, _ = model(imgs)

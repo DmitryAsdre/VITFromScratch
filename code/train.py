@@ -54,7 +54,7 @@ def train(metrics_path : str,
           hidden_dropout_prob : float = 0.0,
           qkv_dropout : float = 0.0,
           qkv_bias : bool = True,
-          intermediate_size : int = 4*128,
+          intermediate_size : int = 2*128,
           batch_size : int = 256,
           learning_rate : float = 5e-3,
           n_epochs : int = 100,
@@ -73,16 +73,19 @@ def train(metrics_path : str,
                                intermediate_size = intermediate_size).to(device)
 
     train_transform = transforms.Compose(
-        [transforms.ToTensor(),
-        transforms.Resize((image_size, image_size)),
+        [transforms.TrivialAugmentWide(interpolation=transforms.InterpolationMode.BILINEAR),
         transforms.RandomHorizontalFlip(p=0.5),
-        transforms.RandomResizedCrop((image_size, image_size), scale=(0.8, 1.0), ratio=(0.75, 1.3333333333333333), interpolation=2),
+        transforms.RandomVerticalFlip(p=0.5),
+        transforms.RandomCrop(32, padding=4),
+        transforms.PILToTensor(),
+        transforms.ConvertImageDtype(torch.float),
+        transforms.RandomErasing(p=0.1),
         transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
     
     test_transform = transforms.Compose(
-        [transforms.ToTensor(),
-        transforms.Resize((image_size, image_size)),
-        transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
+        [transforms.Resize(32),
+            transforms.ToTensor(),
+            transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
 
     train_dataset = torchvision.datasets.CIFAR10(root=dataset_path, train=True, download=True, transform=train_transform)
     val_dataset = torchvision.datasets.CIFAR10(root=dataset_path, train=False, download=True, transform=test_transform)
@@ -97,7 +100,7 @@ def train(metrics_path : str,
     valid_losses = []
     valid_accuracies = []
     
-    for _ in tqdm.tqdm(range(n_epochs)):
+    for _ in (pbar :=tqdm.tqdm(range(n_epochs))):
         train_loss = train_one_epoch(vit,
                                      optimizer,
                                      loss_fn,
@@ -113,9 +116,7 @@ def train(metrics_path : str,
         valid_losses.append(valid_loss)
         valid_accuracies.append(valid_accuracy)
         
-    print(train_losses)
-    print(valid_losses)
-    print(valid_accuracies)
+        pbar.set_postfix_str(f'{train_losses[-1]}, {valid_losses[-1]}, {valid_accuracies[-1]}')
     
     save_metrics(train_losses,
                  valid_losses,

@@ -17,30 +17,9 @@
     `python train.py --metrics_path='./data/default_parameters'`
 
 # Metrics 
-**Default parameters**
+**CutMix+MixUP**
+- Best Accuracy on CIFAR10 dataset - **0.8984375**
 
-  `{"best_valid_ce": 1.5451745688915253, 
-  "best_valid_accuracy": 0.73271484375, 
-  "image_size": 32, 
-  "patch_size": 8, 
-  "num_classes": 10, 
-  "num_hidden_layers": 6, 
-  "num_attention_heads": 8, 
-  "hidden_size": 128, 
-  "hidden_dropout_prob": 0.0, 
-  "qkv_dropout": 0.0, 
-  "qkv_bias": true, 
-  "intermediate_size": 512, 
-  "batch_size": 256,
-  "learning_rate": 0.005, 
-  "n_epochs": 100}`
+  `{"best_valid_ce": 1.9957913637161255, "best_valid_accuracy": 0.8984375, "image_size": 32, "patch_size": 4, "num_classes": 10, "num_hidden_layers": 6, "num_attention_heads": 8, "hidden_size": 128, "hidden_dropout_prob": 0.0, "qkv_dropout": 0.0, "qkv_bias": true, "intermediate_size": 256, "batch_size": 256, "learning_rate": 0.001, "n_epochs": 700}`
   
-  ![Alt](./data/default_parameters/metrics.jpg)
-
-**Small patch**
-
-![Alt](./data/small_patch/metrics.jpg)
-
-**Small patch and big attention heads**
-
-![Alt](./data/big_attention_heads_small_patch/metrics.jpg)
+  ![Alt](./data/cutmix_mixup_augs/metrics.jpg)
